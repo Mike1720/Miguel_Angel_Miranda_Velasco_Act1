@@ -1,9 +1,8 @@
-<%@ page import="Controller.Triangle" %>
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="jakarta.servlet.http.*" %>
 <!DOCTYPE html>
 <html>
-
 <head>
+    <meta charset="UTF-8">
     <title>Calculadora de area y perimetro de triangulos equilateros</title>
     <style>
         body {
@@ -17,39 +16,77 @@
 
 <body>
 
-<%--
-    -Crea un nuevo proyecto de tipo aplicación web en NetBeans.
-    -En el index construye un formulario donde solicites la base y altura para un triángulo equilátero.
-    -Construye una clase Java llamada triángulo, en la que codificarás los métodos necesarios para calcular el área y el perímetro de un triángulo equilátero.
-        Recuerda que la base (b) es uno de los lados del triángulo y, por lo tanto, A = (b*h)/2 y P = 3*b.
-    -Construye una JSP en la que recibas los datos proporcionados por el usuario, invoques a la clase triángulo para efectuar los cálculos, y muestres el resultado.
-    -Haz el deployment de tu aplicación.
---%>
 <h1>Calculadora de area y perimetro de triangulos equilateros</h1>
-<h3>Resultados: </h3>
+
 <%
-    String baseStr = request.getParameter("base");
-    String alturaStr = request.getParameter("altura");
-    double area = 0;
-    double perimeter = 0;
+    HttpSession sesion = request.getSession();
+    String name = (String) sesion.getAttribute("name");
+%>
 
-    if (baseStr != null && alturaStr != null) {
-        try {
-            double base = Double.parseDouble(baseStr);
-            double altura = Double.parseDouble(alturaStr);
+<% if (name != null) { %>
+<h2>Hola, <%= name %>! </h2>
+<% } %>
 
-            Triangle triangle = new Triangle(base, altura);
-            area = triangle.calculateArea();
-            perimeter = triangle.calculatePerimeter();
-        } catch (NumberFormatException e) {
-            out.println("<p style='color:red;'>Por favor, ingresa valores numéricos válidos para la base y la altura.</p>");
+<%
+    Cookie[] cookies = request.getCookies();
+
+    String base = null;
+    String altura = null;
+    String perimetro = null;
+    String area = null;
+
+    if (cookies != null) {
+        for (Cookie cookie : cookies) {
+            switch (cookie.getName()) {
+                case "base":
+                    base = cookie.getValue();
+                    break;
+                case "altura":
+                    altura = cookie.getValue();
+                    break;
+                case "perimetro":
+                    perimetro = cookie.getValue();
+                    break;
+                case "area":
+                    area = cookie.getValue();
+                    break;
+            }
+        }
+
+        if (base != null) {
+%>
+<hr>
+<h2>Datos del triangulo anterior:</h2>
+<h3>Base: <%= base %> cm</h3>
+<h3>Altura: <%= altura %> cm</h3>
+<h3>Perimetro: <%= perimetro %> cm</h3>
+<h3>Area: <%= area %> cm cuadrados</h3>
+<%
         }
     }
 %>
-<p> El perimetro del triángulo equilátero es: <%= perimeter %> cm
-</p>
-<p> El área del triángulo equilátero es: <%= area %> cm²
-</p>
-</body>
 
+<hr>
+
+<form action="showResults" method="post">
+
+    <% if (name == null) { %>
+    <label>Ingresa tu nombre:</label>
+    <input type="text" name="name" required>
+    <br><br>
+    <% } %>
+
+    <label>Base (cm):</label>
+    <input type="text" name="base" required>
+    <br><br>
+
+    <label>Altura (cm):</label>
+    <input type="text" name="altura" required>
+    <br><br>
+
+    <input type="submit" value="Calcular">
+
+</form>
+
+</body>
 </html>
